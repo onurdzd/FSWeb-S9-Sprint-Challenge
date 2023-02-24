@@ -1,78 +1,166 @@
-import React from 'react'
-
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 // önerilen başlangıç stateleri
-const initialMessage = ''
-const initialEmail = ''
-const initialSteps = 0
-const initialIndex = 4 //  "B" nin bulunduğu indexi
+const initialMessage = "";
+const initialEmail = "";
+const initialSteps = 0;
+const initialIndex = 4; //  "B" nin bulunduğu indexi
 
 export default function AppFunctional(props) {
   // AŞAĞIDAKİ HELPERLAR SADECE ÖNERİDİR.
   // Bunları silip kendi mantığınızla sıfırdan geliştirebilirsiniz.
 
-  function getXY() {
-    // Koordinatları izlemek için bir state e sahip olmak gerekli değildir.
-    // Bunları hesaplayabilmek için "B" nin hangi indexte olduğunu bilmek yeterlidir.
-  }
+  const gridArray = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  const gridArrayKoordinat = [
+    { x: 1, y: 1 },
+    { x: 2, y: 1 },
+    { x: 3, y: 1 },
+    { x: 1, y: 2 },
+    { x: 2, y: 2 },
+    { x: 3, y: 2 },
+    { x: 1, y: 3 },
+    { x: 2, y: 3 },
+    { x: 3, y: 3 },
+  ];
+  const [indexDeger, setIndexDeger] = useState(initialIndex);
+  const [bIndex, useBIndex] = useState(initialIndex);
+  const [moveCount, setMoveCount] = useState(initialSteps);
+  const [mesaj, setMesaj] = useState(initialMessage);
+  const [mail, setMail] = useState(initialEmail);
 
-  function getXYMesaj() {
-    // Kullanıcı için "Koordinatlar (2, 2)" mesajını izlemek için bir state'in olması gerekli değildir.
-    // Koordinatları almak için yukarıdaki "getXY" helperını ve ardından "getXYMesaj"ı kullanabilirsiniz.
-    // tamamen oluşturulmuş stringi döndürür.
-  }
+  const handleMove = (e) => {
+    if (e.target.id === "up") {
+      if (indexDeger - 3 >= 0) {
+        setMesaj("");
+        setIndexDeger(indexDeger - 3);
+        setMoveCount(moveCount + 1);
+      } else {
+        setMesaj("Yukarıya gidemezsiniz");
+      }
+    }
+    if (e.target.id === "down") {
+      if (indexDeger + 3 <= 8) {
+        setMesaj("");
+        setIndexDeger(indexDeger + 3);
+        setMoveCount(moveCount + 1);
+      } else {
+        setMesaj("Aşağıya gidemezsiniz");
+      }
+    }
+    if (e.target.id === "left") {
+      if (gridArrayKoordinat[indexDeger].x !== 1) {
+        setMesaj("");
+        setIndexDeger(indexDeger - 1);
+        setMoveCount(moveCount + 1);
+      } else {
+        setMesaj("Sola gidemezsiniz");
+      }
+    }
+    if (e.target.id === "right") {
+      if (gridArrayKoordinat[indexDeger].x !== 3) {
+        setMesaj("");
+        setIndexDeger(indexDeger + 1);
+        setMoveCount(moveCount + 1);
+      } else {
+        setMesaj("Sağa gidemezsiniz");
+      }
+    }
+  };
 
-  function reset() {
-    // Tüm stateleri başlangıç ​​değerlerine sıfırlamak için bu helperı kullanın.
-  }
+  const handleReset = () => {
+    setMesaj(initialMessage);
+    setIndexDeger(initialIndex);
+    setMoveCount(0);
+    setMail(initialEmail);
+  };
 
-  function sonrakiIndex(yon) {
-    // Bu helper bir yön ("sol", "yukarı", vb.) alır ve "B" nin bir sonraki indeksinin ne olduğunu hesaplar.
-    // Gridin kenarına ulaşıldığında başka gidecek yer olmadığı için,
-    // şu anki indeksi değiştirmemeli.
-  }
+  const handleChange = (e) => {
+    setMail(e.target.value);
+  };
 
-  function ilerle(evt) {
-    // Bu event handler, "B" için yeni bir dizin elde etmek üzere yukarıdaki yardımcıyı kullanabilir,
-    // ve buna göre state i değiştirir.
-  }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (mail === "") {
+      setMesaj("Ouch: email is required");
+    }
+    if (mail === "foo@bar.baz") {
+      setMesaj("foo@bar.baz failure #71");
+    }
+    if (mail === "bad@email") {
+      setMesaj("Ouch: email must be a valid email");
+    } else {
+      axios
+        .post("http://localhost:9000/api/result", {
+          x: gridArrayKoordinat[indexDeger].x,
+          y: gridArrayKoordinat[indexDeger].y,
+          steps: moveCount,
+          email: mail,
+        })
+        .then((response) => {
+          console.log("çalıştı", response.data);
+          setMesaj(response.data.message);
+        });
+    }
+  };
 
-  function onChange(evt) {
-    // inputun değerini güncellemek için bunu kullanabilirsiniz
-  }
-
-  function onSubmit(evt) {
-    // payloadu POST etmek için bir submit handlera da ihtiyacınız var.
-  }
+  useEffect(() => {
+    useBIndex(gridArray[indexDeger]);
+  }, [indexDeger]);
 
   return (
     <div id="wrapper" className={props.className}>
       <div className="info">
-        <h3 id="coordinates">Koordinatlar (2, 2)</h3>
-        <h3 id="steps">0 kere ilerlediniz</h3>
+        <h3 id="coordinates">
+          Koordinatlar{" "}
+          {"(" +
+            gridArrayKoordinat[indexDeger].x +
+            "," +
+            gridArrayKoordinat[indexDeger].y +
+            ")"}
+        </h3>
+        <h3 id="steps">
+          {moveCount !== 1
+            ? moveCount + " kere ilerlediniz"
+            : moveCount + " kere"}
+        </h3>
       </div>
       <div id="grid">
-        {
-          [0, 1, 2, 3, 4, 5, 6, 7, 8].map(idx => (
-            <div key={idx} className={`square${idx === 4 ? ' active' : ''}`}>
-              {idx === 4 ? 'B' : null}
-            </div>
-          ))
-        }
+        {gridArray.map((idx) => (
+          <div key={idx} className={`square${idx === bIndex ? " active" : ""}`}>
+            {idx === bIndex ? "B" : null}
+          </div>
+        ))}
       </div>
       <div className="info">
-        <h3 id="message"></h3>
+        <h3 id="message">{mesaj && mesaj}</h3>
       </div>
       <div id="keypad">
-        <button id="left">SOL</button>
-        <button id="up">YUKARI</button>
-        <button id="right">SAĞ</button>
-        <button id="down">AŞAĞI</button>
-        <button id="reset">reset</button>
+        <button onClick={handleMove} id="left">
+          SOL
+        </button>
+        <button onClick={handleMove} id="up">
+          YUKARI
+        </button>
+        <button onClick={handleMove} id="right">
+          SAĞ
+        </button>
+        <button onClick={handleMove} id="down">
+          AŞAĞI
+        </button>
+        <button onClick={handleReset} id="reset">
+          reset
+        </button>
       </div>
-      <form>
-        <input id="email" type="email" placeholder="email girin"></input>
+      <form onSubmit={handleSubmit}>
+        <input
+          id="email"
+          type="email"
+          placeholder="email girin"
+          onChange={handleChange}
+          value={mail}
+        ></input>
         <input id="submit" type="submit"></input>
       </form>
     </div>
-  )
+  );
 }
