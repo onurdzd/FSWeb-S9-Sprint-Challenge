@@ -99,6 +99,7 @@ export default function AppFunctional(props) {
         .then((response) => {
           console.log("çalıştı", response.data);
           setMesaj(response.data.message);
+          setMail(initialEmail);
         });
     }
   };
