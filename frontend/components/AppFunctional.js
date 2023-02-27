@@ -99,10 +99,13 @@ export default function AppFunctional(props) {
         .then((response) => {
           console.log("çalıştı", response.data);
           setMesaj(response.data.message);
-          setMail(initialEmail);
-        });
+          setMail(initialEmail)
+        }).catch((error)=>{
+          setMesaj(error.response.data.message)
+        })
     }
   };
+
 
   useEffect(() => {
     useBIndex(gridArray[indexDeger]);
@@ -120,9 +123,8 @@ export default function AppFunctional(props) {
             ")"}
         </h3>
         <h3 id="steps">
-          {moveCount !== 1
-            ? moveCount + " kere ilerlediniz"
-            : moveCount + " kere"}
+          {moveCount + " kere ilerlediniz"
+          }
         </h3>
       </div>
       <div id="grid">
