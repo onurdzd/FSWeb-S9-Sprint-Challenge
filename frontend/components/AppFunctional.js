@@ -80,15 +80,6 @@ export default function AppFunctional(props) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (mail === "") {
-      setMesaj("Ouch: email is required");
-    }
-    if (mail === "foo@bar.baz") {
-      setMesaj("foo@bar.baz failure #71");
-    }
-    if (mail === "bad@email") {
-      setMesaj("Ouch: email must be a valid email");
-    } else {
       axios
         .post("http://localhost:9000/api/result", {
           x: gridArrayKoordinat[indexDeger].x,
@@ -103,7 +94,6 @@ export default function AppFunctional(props) {
         }).catch((error)=>{
           setMesaj(error.response.data.message)
         })
-    }
   };
 
 
